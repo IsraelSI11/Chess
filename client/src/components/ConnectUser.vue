@@ -11,8 +11,10 @@ export default {
     methods: {
         connectUser() {
             this.usernameAlreadySelected = true;
+            let username = this.username;
             socket.auth = { username };
             socket.connect();
+            this.$router.push({ name: "Chess" });
         }
     },
     destroyed() {

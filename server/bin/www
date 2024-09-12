@@ -37,7 +37,17 @@ io.on("connection", (socket) => {
       username: socket.username,
     });
   }
+  console.log(users, "usuarios conectados");
   socket.emit("users", users);
+});
+
+io.on("connection", (socket) => {
+  // notify existing users
+  socket.broadcast.emit("user connected", {
+    userID: socket.id,
+    username: socket.username,
+  });
+  console.log("Notificamos a los usuarios");
 });
 
 io.use((socket, next) => {
