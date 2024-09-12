@@ -3,8 +3,13 @@ import TheChessView from './components/TheChessView.vue';
 import { socket } from './sockets';
 
 socket.off();
+
+
 </script>
 
+
 <template>
-  <TheChessView />
+  <div id="app">
+    <router-view />
+  </div>
 </template>

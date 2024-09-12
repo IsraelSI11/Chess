@@ -23,15 +23,31 @@ var server = http.createServer(app);
 
 const { Server } = require("socket.io");
 
-const io = new Server(server,{
+const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173"
   }
 });
 
-io.on('connection', (socket) => {
-    console.log('a user connected');
-  });
+io.on("connection", (socket) => {
+  const users = [];
+  for (let [id, socket] of io.of("/").sockets) {
+    users.push({
+      userID: id,
+      username: socket.username,
+    });
+  }
+  socket.emit("users", users);
+});
+
+io.use((socket, next) => {
+  const username = socket.handshake.auth.username;
+  if (!username) {
+    return next(new Error("invalid username"));
+  }
+  socket.username = username;
+  next();
+});
 
 /**
  * Listen on provided port, on all network interfaces.
