@@ -48,6 +48,20 @@ io.on("connection", (socket) => {
     username: socket.username,
   });
   console.log("Notificamos a los usuarios");
+
+  socket.on("inviteuser", ({ username, to }) => {
+    console.log("Invitamos a un usuario");
+    socket.to(to).emit("invitation", {
+      username,
+      from: socket.id,
+    });
+  });
+
+  socket.on("acceptinvitation", ({ to, from }) => {
+    io.to(to).to(from).emit("startgame", {
+      white: from
+    });
+  });
 });
 
 io.use((socket, next) => {
