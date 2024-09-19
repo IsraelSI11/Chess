@@ -59,7 +59,15 @@ io.on("connection", (socket) => {
 
   socket.on("acceptinvitation", ({ to, from }) => {
     io.to(to).to(from).emit("startgame", {
-      white: from
+      white: from,
+      userID: from,
+    });
+  });
+
+  socket.on("move", ({ move, to }) => {
+    console.log(to, "movimiento");
+    socket.to(to).emit("move", {
+      move:move
     });
   });
 });

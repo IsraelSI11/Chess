@@ -1,5 +1,5 @@
 <script lang="ts">
-import { TheChessboard } from 'vue3-chessboard';
+import { BoardApi, BoardConfig, TheChessboard } from 'vue3-chessboard';
 import 'vue3-chessboard/style.css';
 import { socket } from '@/sockets';
 import InvitationDialog from './InvitationDialog.vue';
@@ -18,7 +18,8 @@ export default {
       showInvitation: false,
       username: '',
       userID: '',
-      boardConfig: undefined
+      boardConfig: undefined,
+      boardApi : undefined,
     };
   },
   components: {
@@ -32,6 +33,15 @@ export default {
         to: user.userID
       });
     },
+    handleMove(move: any) {
+      let aux : BoardConfig = {viewOnly: true};
+      
+      this.boardApi.setConfig(aux);
+
+      console.log(this.boardConfig,this.boardApi)
+      console.log(this.userID,socket.id)
+      socket.emit("move", { move: move, to: this.userID });
+    }
   },
   mounted() {
     const self = this;
@@ -50,20 +60,24 @@ export default {
     });
 
     socket.on("invitation", ({ username, from }) => {
-      this.username = username;
-      this.userID = from;
-      this.showInvitation = true;
+      self.username = username;
+      self.userID = from;
+      self.showInvitation = true;
     });
 
-    socket.on("startgame", ({ white }) => {
+    socket.on("startgame", ({ white, userID }) => {
       const isWhite = white == socket.id;
-      console.log(white, socket.id, isWhite)
+      self.userID = isWhite ? self.userID : userID;
       const color = isWhite ? "white" : "black";
       self.boardConfig = {
         orientation: color,
         viewOnly: !isWhite
       };
       console.log(self.boardConfig)
+    });
+
+    socket.on("move", ({ move }) => {
+      self.boardApi.setConfig({viewOnly: false, fen: move.after});
     });
 
     // Evento para manejar la conexión de un nuevo usuario
@@ -76,7 +90,7 @@ export default {
 </script>
 
 <template>
-  <TheChessboard v-if="boardConfig" :boardConfig="boardConfig"/>
+  <TheChessboard v-if="boardConfig" :boardConfig="boardConfig" @move="handleMove" @board-created="(api) => (boardApi = api)" reactive-config/>
   <div>
     <h2>Users</h2>
     <ul>
