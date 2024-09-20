@@ -14,17 +14,14 @@ interface User {
 export default {
   data() {
     return {
-      users: [] as User[],
-      showInvitation: false,
-      username: '',
       userID: '',
       boardConfig: undefined,
-      boardApi : undefined,
+      boardApi: undefined,
+      color: ''
     };
   },
   components: {
     TheChessboard,
-    InvitationDialog
   },
   methods: {
     inviteUser(user: User) {
@@ -34,55 +31,41 @@ export default {
       });
     },
     handleMove(move: any) {
-      let aux : BoardConfig = {viewOnly: true};
-      
+      let aux: BoardConfig = { viewOnly: true };
       this.boardApi.setConfig(aux);
-
-      console.log(this.boardConfig,this.boardApi)
-      console.log(this.userID,socket.id)
       socket.emit("move", { move: move, to: this.userID });
-    }
+    },
+    handleCheckmate(isMated: any) {
+      if (isMated == this.color) {
+        alert("Has perdido!");
+      } else {
+        alert("Has ganado!");
+      }
+    },
+    updateUserID(userID : String) {
+      this.userID = userID;
+    },
   },
   mounted() {
     const self = this;
-
     // Maneja la lista inicial de usuarios
-    socket.on("users", (users) => {
-      users.forEach((user: User) => {
-        user.self = user.userID === socket.id;
-      });
-      // Poner al usuario actual primero, y luego ordenar por nombre
-      self.users = users.sort((a: User, b: User) => {
-        if (a.self) return -1;
-        if (b.self) return 1;
-        return a.username.localeCompare(b.username);
-      });
-    });
-
-    socket.on("invitation", ({ username, from }) => {
-      self.username = username;
-      self.userID = from;
-      self.showInvitation = true;
-    });
-
     socket.on("startgame", ({ white, userID }) => {
       const isWhite = white == socket.id;
-      self.userID = isWhite ? self.userID : userID;
-      const color = isWhite ? "white" : "black";
+      self.userID = isWhite ? userID : white;
+      self.color = isWhite ? "white" : "black";
       self.boardConfig = {
-        orientation: color,
+        orientation: self.color,
         viewOnly: !isWhite
       };
-      console.log(self.boardConfig)
     });
 
     socket.on("move", ({ move }) => {
-      self.boardApi.setConfig({viewOnly: false, fen: move.after});
+      self.boardApi.setConfig({ viewOnly: false, fen: move.after });
     });
 
-    // Evento para manejar la conexión de un nuevo usuario
-    socket.on("user connected", (user: User) => {
-      self.users.push(user);
+    socket.emit("readyforgame", {
+      to: self.$route.params.to,
+      from: self.$route.params.from,
     });
   },
 
@@ -90,13 +73,6 @@ export default {
 </script>
 
 <template>
-  <TheChessboard v-if="boardConfig" :boardConfig="boardConfig" @move="handleMove" @board-created="(api) => (boardApi = api)" reactive-config/>
-  <div>
-    <h2>Users</h2>
-    <ul>
-      <li v-for="user in users" :key="user.userID">{{ user.username }} <span v-if="user.self">(You)</span> <span
-          v-else><button @click="inviteUser(user)">Conectar</button></span></li>
-    </ul>
-  </div>
-  <InvitationDialog :username="username" :show="showInvitation" :userID="userID" />
+  <TheChessboard v-if="boardConfig" :boardConfig="boardConfig" @move="handleMove" @checkmate="handleCheckmate"
+    @board-created="(api) => (boardApi = api)" reactive-config />
 </template>

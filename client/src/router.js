@@ -1,15 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import ConnectUser from './components/ConnectUser.vue'
 import TheChessView from './components/TheChessView.vue'
+import UsersList from './components/UsersList.vue'
 
 const routes = [
   {
     path: '/',
-    name: 'Home',
+    name: 'Index',
     component: ConnectUser
   },
   {
-    path: '/chess',
+    path: '/home',
+    name: 'Home',
+    component: UsersList
+  },
+  {
+    path: '/chess/:to/:from',
     name: 'Chess',
     component: TheChessView
   }

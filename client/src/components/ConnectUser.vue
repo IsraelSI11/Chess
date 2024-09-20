@@ -14,7 +14,7 @@ export default {
             let username = this.username;
             socket.auth = { username };
             socket.connect();
-            this.$router.push({ name: "Chess" });
+            this.$router.push({ name: "Home" });
         }
     },
     destroyed() {

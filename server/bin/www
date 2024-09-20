@@ -58,14 +58,21 @@ io.on("connection", (socket) => {
   });
 
   socket.on("acceptinvitation", ({ to, from }) => {
+    console.log("Aceptamos la invitacion", to,from);
+    io.to(to).to(from).emit("chessview", {
+      to: to,
+      from: from,
+    });
+  });
+
+  socket.on("readyforgame", ({ to, from }) => {
     io.to(to).to(from).emit("startgame", {
       white: from,
-      userID: from,
+      userID: to,
     });
   });
 
   socket.on("move", ({ move, to }) => {
-    console.log(to, "movimiento");
     socket.to(to).emit("move", {
       move:move
     });

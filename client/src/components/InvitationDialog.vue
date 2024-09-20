@@ -3,23 +3,22 @@ import { socket } from '@/sockets';
 
 export default {
     props: {
-        username: {
-            type: String,
-            required: true
-        },
         userID: {
             type: String,
-            required: true
+            required: true,
         },
-        show: {
-            type: Boolean,
-            required: true
-        }
+    },
+    data() {
+        return {
+            show: false,
+            username: '',
+        };
     },
     methods: {
         resetProps() {
             this.username = '';
             this.show = false;
+            this.userID = '';
         },
         accept() {
             socket.emit('acceptinvitation', {
@@ -29,8 +28,19 @@ export default {
         },
         decline() {
             this.resetProps();
-        }
-    }
+        },
+        emitUpdateUserID(userID) {
+            this.$emit('update-user-id', userID);
+        },
+    },
+    mounted() {
+        const self=this;
+        socket.on("invitation", ({ username, from }) => {
+            self.username = username;
+            self.emitUpdateUserID(from);
+            self.show = true;
+        });
+    },
 };
 </script>
 
