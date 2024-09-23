@@ -37,7 +37,6 @@ io.on("connection", (socket) => {
       username: socket.username,
     });
   }
-  console.log(users, "usuarios conectados");
   socket.emit("users", users);
 });
 
@@ -58,7 +57,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("acceptinvitation", ({ to, from }) => {
-    console.log("Aceptamos la invitacion", to,from);
+    console.log("Aceptamos la invitacion", to, from);
     io.to(to).to(from).emit("chessview", {
       to: to,
       from: from,
@@ -74,8 +73,20 @@ io.on("connection", (socket) => {
 
   socket.on("move", ({ move, to }) => {
     socket.to(to).emit("move", {
-      move:move
+      move: move
     });
+  });
+
+  socket.on("finishgame", () => {
+    const users = [];
+    for (let [id, socket] of io.of("/").sockets) {
+      users.push({
+        userID: id,
+        username: socket.username,
+      });
+    }
+    console.log(users, "finishgame")
+    socket.emit("users", users);
   });
 });
 

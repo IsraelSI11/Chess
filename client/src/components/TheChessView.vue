@@ -1,9 +1,8 @@
 <script lang="ts">
-import { BoardApi, BoardConfig, TheChessboard } from 'vue3-chessboard';
+import {  BoardConfig, TheChessboard } from 'vue3-chessboard';
 import 'vue3-chessboard/style.css';
 import { socket } from '@/sockets';
-import InvitationDialog from './InvitationDialog.vue';
-import { readonly } from 'vue';
+import ResultOfGame from './ResultOfGame.vue';
 
 interface User {
   userID: string;
@@ -17,11 +16,14 @@ export default {
       userID: '',
       boardConfig: undefined,
       boardApi: undefined,
-      color: ''
+      color: '',
+      draw: false,
+      result: '',
     };
   },
   components: {
     TheChessboard,
+    ResultOfGame
   },
   methods: {
     inviteUser(user: User) {
@@ -36,11 +38,10 @@ export default {
       socket.emit("move", { move: move, to: this.userID });
     },
     handleCheckmate(isMated: any) {
-      if (isMated == this.color) {
-        alert("Has perdido!");
-      } else {
-        alert("Has ganado!");
-      }
+      this.result = isMated == "white" ? "negras" : "blancas";
+    },
+    handleDraw() {
+      this.draw = true;
     },
     updateUserID(userID : String) {
       this.userID = userID;
@@ -73,6 +74,7 @@ export default {
 </script>
 
 <template>
-  <TheChessboard v-if="boardConfig" :boardConfig="boardConfig" @move="handleMove" @checkmate="handleCheckmate"
+  <TheChessboard v-if="boardConfig" :boardConfig="boardConfig" @move="handleMove" @draw="handleDraw" @checkmate="handleCheckmate"
     @board-created="(api) => (boardApi = api)" reactive-config />
+  <ResultOfGame :draw="draw" :result="result"/>
 </template>
