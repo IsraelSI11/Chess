@@ -36,6 +36,47 @@ socket.on("connect_error", (err) => {
 </script>
 
 <template>
-    <input type="text" v-model="username" placeholder="Enter your username" />
-    <button @click="connectUser">Connect</button>
+    <section>
+        <label for="username">Nombre de usuario</label>
+        <input id="username" name="username" type="text" v-model="username" placeholder="Introduce tu nombre de usuario" />
+        <button @click="connectUser">Conectarse</button>
+    </section>
 </template>
+
+<style lang="css" scoped>
+
+section{
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color:#7f8c8d;
+}
+
+input {
+    margin-top: 0.5em;
+    margin-bottom: 2em;
+    padding: 1.2em;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+    width: 85%;
+}
+
+button {
+    padding: 0.75em 2em;
+    font-size: 1.1rem;
+    color: white;
+    background-color: #429942;
+    border: none;
+    border-radius: 1em;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #02350a;
+}
+
+
+</style>

@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import ConnectUser from './components/ConnectUser.vue'
 import TheChessView from './components/TheChessView.vue'
 import UsersList from './components/UsersList.vue'
+import IndexView from './components/IndexView.vue'
 
 const routes = [
   {
     path: '/',
     name: 'Index',
-    component: ConnectUser
+    component: IndexView
   },
   {
     path: '/home',
