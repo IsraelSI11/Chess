@@ -8,13 +8,7 @@ module.exports = function (server) {
     });
 
     io.on("connection", (socket) => {
-        const users = [];
-        for (let [id, socket] of io.of("/").sockets) {
-            users.push({
-                userID: id,
-                username: socket.username,
-            });
-        }
+        const users = obtainUsers(io);
         socket.emit("users", users);
     });
 
@@ -24,7 +18,7 @@ module.exports = function (server) {
             userID: socket.id,
             username: socket.username,
         });
-        console.log("Notificamos a los usuarios");
+        
 
         socket.on("inviteuser", ({ username, to }) => {
             console.log("Invitamos a un usuario");
@@ -35,11 +29,13 @@ module.exports = function (server) {
         });
 
         socket.on("acceptinvitation", ({ to, from }) => {
-            console.log("Aceptamos la invitacion", to, from);
             io.to(to).to(from).emit("chessview", {
                 to: to,
                 from: from,
             });
+            //Eliminamos los usuarios que estan jugando
+            let users = obtainUsers(io).filter(user => user.userID !== to && user.userID !== from);
+            io.emit("users", users);
         });
 
         socket.on("readyforgame", ({ to, from }) => {
@@ -56,14 +52,7 @@ module.exports = function (server) {
         });
 
         socket.on("finishgame", () => {
-            const users = [];
-            for (let [id, socket] of io.of("/").sockets) {
-                users.push({
-                    userID: id,
-                    username: socket.username,
-                });
-            }
-            console.log(users, "finishgame");
+            const users = obtainUsers(io);
             socket.emit("users", users);
         });
     });
@@ -77,3 +66,14 @@ module.exports = function (server) {
         next();
     });
 };
+
+function obtainUsers(io){
+    const users = [];
+    for (let [id, socket] of io.of("/").sockets) {
+        users.push({
+            userID: id,
+            username: socket.username,
+        });
+    }
+    return users;
+}
