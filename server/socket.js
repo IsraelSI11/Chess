@@ -24,7 +24,6 @@ module.exports = function (server) {
         
 
         socket.on("inviteuser", ({ username, to }) => {
-            console.log("Invitamos a un usuario");
             socket.to(to).emit("invitation", {
                 username,
                 from: socket.id,
