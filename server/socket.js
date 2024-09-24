@@ -1,6 +1,9 @@
 const { Server } = require("socket.io");
 
 module.exports = function (server) {
+
+    let busyUsers = [];
+
     const io = new Server(server, {
         cors: {
             origin: "http://localhost:5173"
@@ -8,7 +11,7 @@ module.exports = function (server) {
     });
 
     io.on("connection", (socket) => {
-        const users = obtainUsers(io);
+        const users = obtainAvailableUsers(io, busyUsers);
         socket.emit("users", users);
     });
 
@@ -33,8 +36,10 @@ module.exports = function (server) {
                 to: to,
                 from: from,
             });
-            //Eliminamos los usuarios que estan jugando
-            let users = obtainUsers(io).filter(user => user.userID !== to && user.userID !== from);
+            //Añadimos los usuarios a la lista de ocupados
+            busyUsers.push(to);
+            busyUsers.push(from);
+            let users = obtainAvailableUsers(io, busyUsers);
             io.emit("users", users);
         });
 
@@ -51,9 +56,11 @@ module.exports = function (server) {
             });
         });
 
-        socket.on("finishgame", () => {
-            const users = obtainUsers(io);
-            socket.emit("users", users);
+        socket.on("finishgame", ({from}) => {
+            //Eliminamos los usuarios de la lista de ocupados
+            busyUsers = busyUsers.filter(user => user !== from);
+            const users = obtainAvailableUsers(io, busyUsers);
+            io.emit("users", users);
         });
     });
 
@@ -76,4 +83,8 @@ function obtainUsers(io){
         });
     }
     return users;
+}
+
+function obtainAvailableUsers(io, busyUsers){
+    return obtainUsers(io).filter(user => !busyUsers.includes(user.userID));
 }

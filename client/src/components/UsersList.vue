@@ -36,6 +36,8 @@ export default {
         const self = this;
         // Maneja la lista inicial de usuarios
         socket.on("users", (users) => {
+            console.log("on users")
+            console.log(users)
             users.forEach((user: User) => {
                 user.self = user.userID === socket.id;
             });

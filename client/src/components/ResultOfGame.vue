@@ -22,7 +22,9 @@ export default {
     methods: {
         accept() {
             //Notificamos al servidor de que el usuario vuelve a estar disponible
-            socket.emit('finishgame');
+            socket.emit('finishgame', {
+                from: socket.id,
+            });
             this.$router.push({ name: "Home" });
         },
     }
@@ -30,7 +32,7 @@ export default {
 </script>
 
 <template>
-    <div class="result-dialog" v-show="draw || result!=''">
+    <div class="result-dialog" v-show="draw || result != ''">
         <h2>Resultado</h2>
         <p v-if="!draw">Han ganado las {{ result }}</p>
         <p v-else>La partida ha terminado en empate</p>
@@ -39,7 +41,6 @@ export default {
 </template>
 
 <style scoped>
-
 .result-dialog {
     background-color: #ffffff;
     padding: 2em;
@@ -97,6 +98,7 @@ p {
         transform: translateY(-50%);
         opacity: 0;
     }
+
     100% {
         transform: translateY(0);
         opacity: 1;
